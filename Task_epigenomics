@@ -190,18 +190,13 @@ mkdir data/bigBed.files analyses/peaks.analysis
    		
 
 
-#####------------------------------------------------------------------------------------------TASK 3---------------------------------------------------------------------------------------------#####
-##### Focus on regulatory elements that are located on chromosome 1, and generate a file regulatory.elements.starts.tsv that contains the name of the regulatory region (i.e. the name of the original ##### ATAC-seq peak) and the start (5') coordinate of the region.
-#####---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#####
+### Task3. Focus on regulatory elements that are located on chromosome 1, and generate a file regulatory.elements.starts.tsv that contains the name of the regulatory region (i.e. the name of the original ##### ATAC-seq peak) and the start (5') coordinate of the region.
 
-### Create folder for peaks found in chr1
 	mkdir chr1
 	
-### Select the peaks found in chr1 for sigmoid tissue
 	grep -w chr1 data/total_sigmoid.bed |\
 	awk '{print $4 "\t" $2}' > chr1/sigmoid.regulatory.elements.starts.tsv
 	
-## Select the peaks found in chr1 for stomach tissue
 	grep -w chr1 data/total_stomach.bed |\
 	awk '{print $4 "\t" $2}' > chr1/stomach.regulatory.elements.starts.tsv
 	
@@ -212,22 +207,16 @@ mkdir data/bigBed.files analyses/peaks.analysis
 
 
 
-#####------------------------------------------------------------------------------------------TASK 4---------------------------------------------------------------------------------------------#####
-##### Focus on protein-coding genes located on chromosome 1. From the BED file of gene body coordinates that you generated here, prepare a tab-separated file called gene.starts.tsv which will store 
-##### the name of the gene in the first column, and the start coordinate of the gene on the second column (REMEMBER: for genes located on the minus strand, the start coordinate will be at the 3'). 
-#####---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#####
+### Task 4. Focus on protein-coding genes located on chromosome 1. From the BED file of gene body coordinates that you generated here, prepare a tab-separated file called gene.starts.tsv which will store 
+### the name of the gene in the first column, and the start coordinate of the gene on the second column (REMEMBER: for genes located on the minus strand, the start coordinate will be at the 3'). 
 
-### Create file that in col1: gene name and col2: start coordinate
 	grep -w chr1 ../ATAC-seq/annotation/gencode.v24.protein.coding.gene.body.bed| awk 'BEGIN{FS=OFS="\t"}{if ($6=="+"){start=$2} else {start=$3}; print $4, start}' > gene.starts.tsv
 	
-### View file header
 	head gene.starts.tsv
 
 
 
-#####------------------------------------------------------------------------------------------TASK 5---------------------------------------------------------------------------------------------#####
-##### Download or copy this python script inside the epigenomics_uvic/bin folder. 
-#####---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#####
+### TAsk6.  Download or copy this python script inside the epigenomics_uvic/bin folder. 
 
 	cd ../bin
 
@@ -237,8 +226,7 @@ mkdir data/bigBed.files analyses/peaks.analysis
 	
 		## Complete the python script so that for a given coordinate --start the script returns the closest gene, 
 		## the start of the gene and the distance of the regulatory element.Python script modified:
-		########################################################################################################
-		########################################################################################################
+		#
 		#!/usr/bin/env python
 
 
@@ -288,29 +276,19 @@ mkdir data/bigBed.files analyses/peaks.analysis
 
 		# Print the result to STDOUT
 		print "\t".join([selectedGene, str(selectedGeneStart), str(x)])
-		########################################################################################################
-		########################################################################################################
-
+	
 	## Ensure that the script works properly
 		cd regulatory elements
 		
 		python ../bin/get.distance.py --input gene.starts.tsv --start 980000
 
 
-
-#####------------------------------------------------------------------------------------------TASK 6---------------------------------------------------------------------------------------------#####
-##### For each regulatory element contained in the file regulatory.elements.starts.tsv, retrieve the closest gene and the distance to the closest gene using the python script you created above. Use
-##### the command below as a starting point:
-#####---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#####
+### TAsk 6 For each regulatory element contained in the file regulatory.elements.starts.tsv, retrieve the closest gene and the distance to the closest gene using the python script you created above. Use
 
 	for tissue in stomach sigmoid; do   cat regulatory_elements/chr1/"$tissue".regulatory.elements.starts.tsv | while read element start; do     python bin/get.distance.py --input regulatory_elements/gene.starts.tsv --start "$start";   done > regulatory_elements/chr1/"$tissue".regulatory.elements.genes.distances.tsv; done
 
 
-
-#####------------------------------------------------------------------------------------------TASK 7---------------------------------------------------------------------------------------------#####
-##### Use R to compute the mean and the median of the distances stored in regulatoryElements.genes.distances.tsv.
-#####---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#####
-
+### TAsk 7 Use R to compute the mean and the median of the distances stored in regulatoryElements.genes.distances.tsv.
 	for tissue in stomach sigmoid; do
 	  cut -f3 regulatory_elements/chr1/"$tissue".regulatory.elements.genes.distances.tsv > tmp ;\
 	  Rscript -e 'dis <- read.table("tmp")' -e '(mean(t(dis)))' -e '(median(t(dis)))' 
